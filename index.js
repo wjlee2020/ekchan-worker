@@ -31,44 +31,31 @@ router.get('/example/:text', ({ params }) => {
 	});
 });
 
-/*
-This shows a different HTTP method, a POST.
+router.post('/logger', async (request, env) => {
+  const { WEBHOOK_URL } = env;
+  const respJson = await request.json();
 
-Try send a POST request using curl or another tool.
+  try {
+    const loggerResponse = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(respJson),
+    });
 
-Try the below curl command to send JSON:
+    const returnData = JSON.stringify({ status: 200, msg: "sent to discord"}, null, 2);
 
-$ curl -X POST <worker> -H "Content-Type: application/json" -d '{"abc": "def"}'
-*/
-router.post('/post', async request => {
-	// Create a base object with some fields.
-	let fields = {
-		asn: request.cf.asn,
-		colo: request.cf.colo,
-	};
-
-	// If the POST data is JSON then attach it to our response.
-	if (request.headers.get('Content-Type') === 'application/json') {
-		let json = await request.json();
-		Object.assign(fields, { json });
-	}
-
-	// Serialise the JSON to a string.
-	const returnData = JSON.stringify(fields, null, 2);
-
-	return new Response(returnData, {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+    return new Response(returnData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ status: 400, msg: "logger failed" }))
+  }
 });
 
-/*
-This is the last route we define, it will match anything that hasn't hit a route we've defined
-above, therefore it's useful as a 404 (and avoids us hitting worker exceptions, so make sure to include it!).
-
-Visit any page that doesn't exist (e.g. /foobar) to see it in action.
-*/
 router.all('*', () => new Response('404, not found!', { status: 404 }));
 
 export default {
