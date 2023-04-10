@@ -33,13 +33,14 @@ describe('Worker', () => {
 
 	it('should return 200 and reponse object', async () => {
 		const init = {
-			body: { abc: 'def' },
+			body: { content: "hello" },
 			method: 'POST',
 		};
-		const resp = await worker.fetch('/post', init);
+
+		const resp = await worker.fetch('/logger', init);
 		const json = await resp.json();
 		if (resp) {
-			expect(json).toEqual({ asn: 395747, colo: 'DFW' });
+			expect(json).toEqual({ status: 200, msg: 'sent to discord' });
 			expect(resp.status).toBe(200);
 		}
 	});

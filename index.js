@@ -33,15 +33,16 @@ router.get('/example/:text', ({ params }) => {
 
 router.post('/logger', async (request, env) => {
   const { WEBHOOK_URL } = env;
-  const respJson = await request.json();
 
   try {
-    const loggerResponse = await fetch(WEBHOOK_URL, {
+    const requestBody = await request.text();
+
+    await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(respJson),
+      body: requestBody,
     });
 
     const returnData = JSON.stringify({ status: 200, msg: "sent to discord"}, null, 2);
